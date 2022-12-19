@@ -1,0 +1,35 @@
+<!-- index.html -->
+
+<!DOCTYPE html>
+<html>
+
+<head>
+   <title>Temperature Chart</title>
+   <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.1.1/chart.min.js"></script>
+</head>
+
+<body>
+   <canvas id="chart"></canvas>
+   <script>
+      var socket = io();
+      socket.on('temperature', function (temperatures) {
+         var ctx = document.getElementById('chart').getContext('2d');
+         var chart = new Chart(ctx, {
+            type: 'line',
+            data: {
+               labels: ['1', '2', '3', '4', '5'], // add labels for each data point here
+               datasets: [{
+                  label: 'Temperature',
+                  data: temperatures,
+                  backgroundColor: 'rgba(255, 99, 132, 0.2)',
+                  borderColor: 'rgba(255, 99, 132, 1)',
+                  borderWidth: 1
+               }]
+            },
+            options: {}
+         });
+      });
+   </script>
+</body>
+
+</html>
