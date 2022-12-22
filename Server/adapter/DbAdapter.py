@@ -1,18 +1,19 @@
-import json
+import csv
 
 
 class DbAdapter:
    def __init__(self, filename: str):
       self.filename = filename
 
-   def save(self, json_to_db: dict):
-      datos = self.get()
-      datos.append(json_to_db)
+   def save(self, datos: list):
       with open(self.filename, mode="w", encoding="utf-8") as f:
-         json.dump(datos, f, ensure_ascii=False)
+         AdapterWriter = csv.writer(employee_file, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
+         AdapterWriter.writerow(datos)
    
    def get(self):
       datos = list()
-      with open(self.filename, mode="r") as f:
-         datos = json.load(f)
+      with open(self.filename, mode="r", encoding="utf-8") as csv_file:
+         csv_reader = csv.reader(csv_file, delimiter=',')
+         for item in csv_reader:
+            datos.append(item)
       return datos

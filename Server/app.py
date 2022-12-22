@@ -24,17 +24,24 @@ DIR_FILE = os.path.join(os.path.dirname(__file__))
 socketio = SocketIO(app)
 
 
-@app.route("/", methods=["GET"])
+@app.route("/")
 def index():
-   lpath = os.path.join(DIR_FILE, "file", "0.json")
-   # ReferenceDbAdapter = DbAdapter(lpath)
-   # datos = ReferenceDbAdapter.get()
+   lpath = os.path.join(DIR_FILE, "file", "0.txt")
+   ReferenceDbAdapter = DbAdapter(lpath)
+   datos = ReferenceDbAdapter.get()
    user = {
             "id": "0",
             "name": "administrator",
             "is_authenticated": True,
    }
-   return render_template("index.html", title="index", current_user=user)
+   # VALUES IN FORMAT
+   # "id","write_at","value"
+   timestamp = list()
+   temperature = list()
+   for idx, item in enumerate(datos):
+      timestamp.append(idx)
+      temperature.append(float(item[2]))
+   return render_template("index.html", title="index", temperature=temperature, timestamp=timestamp, current_user=user)
 
 @socketio.on("connect")
 def on_connect():
@@ -53,7 +60,9 @@ def on_connect():
    # ReferenceDbAdapter = DbAdapter(lpath)
    # ReferenceDbAdapter.save(ReferenceSensor.to_json())
    # emit("new_message", ReferenceSensor.to_dict(), broadcast=True)
-   emit("temperature", (datetime.now().strftime("%d/%m/%y %H:%M:%S"), 40))
+   lpath = os.path.join(DIR_FILE, "file", "0.txt")
+   ReferenceDbAdapter = DbAdapter(lpath)
+   emit("temperature", (len(ReferenceDbAdapter.get())+1, 40))
 
 
 if __name__ == "__main__":

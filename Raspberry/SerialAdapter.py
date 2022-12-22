@@ -13,6 +13,6 @@ if __name__ == "__main__":
       if ser.in_waiting > 0:
          line = ser.readline().decode("utf-8").rstrip()
          now = datetime.now().strftime("%d/%m/%y %H:%M:%S")
-         data = {"id": "1", "time": now, "value": line}
+         data = [1, now, line]
          response = requests.post(URL, data=data)
          print(response.text)
