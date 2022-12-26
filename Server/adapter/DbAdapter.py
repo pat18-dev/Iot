@@ -6,9 +6,10 @@ class DbAdapter:
       self.filename = filename
 
    def save(self, datos: list):
-      with open(self.filename, mode="w", encoding="utf-8") as f:
-         AdapterWriter = csv.writer(employee_file, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
+      with open(self.filename, mode="a", encoding="utf-8") as csv_file:
+         AdapterWriter = csv.writer(csv_file, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
          AdapterWriter.writerow(datos)
+         csv_file.close()
    
    def get(self):
       datos = list()

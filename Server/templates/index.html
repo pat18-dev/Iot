@@ -1,45 +1,46 @@
 {% extends "components/base.html" %} {% block content %}
 <main class="column is-4 is-offset-4">
    <h3 class="title">Temperatura</h3>
-   <canvas id="chart"></canvas>
-   <script src="https://cdn.socket.io/4.5.4/socket.io.min.js" integrity="sha384-/KNQL8Nu5gCHLqwqfQjA689Hhoqgi2S84SNUxC3roTe4EhJ9AfLkp8QiQcU8AMzI" crossorigin="anonymous"></script>
-   <script data-require="chart.js@*" data-semver="1.0.2" src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/1.0.2/Chart.min.js"></script>
+   <canvas id="myChart" width="400" height="400"></canvas>
+   <script src="https://cdn.socket.io/4.5.4/socket.io.min.js"
+      integrity="sha384-/KNQL8Nu5gCHLqwqfQjA689Hhoqgi2S84SNUxC3roTe4EhJ9AfLkp8QiQcU8AMzI"
+      crossorigin="anonymous"></script>
+   <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.3/Chart.min.js"></script>
    <script>
       // Connect to Socket.IO server
-      var socket = io();
+      var socket = io.connect('http://127.0.0.1:5000');
       // Set up Chart.js line chart
-      var ctx = document.getElementById('chart').getContext('2d');
+      var ctx = document.getElementById("myChart").getContext("2d");
       const tempChart = new Chart(ctx, {
          type: 'line',
          data: {
             datasets: [{
-               label: 'Temperature',
-               data: [ {{ temperature }} ],
-               backgroundColor: 'rgba(255, 99, 132, 0.2)',
-               borderColor: 'rgba(255, 99, 132, 1)',
-               borderWidth: 1,
-               pointRadius: 0
-            }],
-            labels: [ {{ timestamp }} ]
+               label: 'value',
+               data: [],
+            backgroundColor: 'rgba(255, 99, 132, 0.2)',
+            borderColor: 'rgba(255, 99, 132, 1)',
+            borderWidth: 1,
+            pointRadius: 0
+         }],
+         labels: []
          },
-         options: {
-            scales: {
-               xAxes: [{
-                  type: 'time',
-                  time: {
-                     unit: 'time'
-                  }
-               }],
-               yAxes: []
-            }
+      options: {
+         scales: {
+            yAxes: [{
+               ticks: {
+                  beginAtZero: true
+               }
+            }]
          }
+      }
       });
 
       // Add new temperature data points to chart when they are received from the server
-      socket.on('temperature', (timestamp, temperature) => {
-         tempChart.data.datasets[0].data.push({
-            x: timestamp,
-            y: temperature
+      socket.on('draw', (nserial, values) => {
+         console.info("EVENT CALL")
+         tempChart.data.datasets.data.push({
+            x: nserial,
+            y: values
          });
          tempChart.update();
       });

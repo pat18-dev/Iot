@@ -7,6 +7,9 @@ from datetime import datetime
 @dataclass_json
 @dataclass(kw_only=True)
 class SensorModel:
-   sensorid: str
+   sensorid: int
    write_at: datetime
-   value: float 
+   data: float 
+   
+   def get_values(self):
+      return [self.sensorid, self.write_at, self.data]

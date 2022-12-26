@@ -12,7 +12,6 @@ if __name__ == "__main__":
       print(b"Initialization starts!\n")
       if ser.in_waiting > 0:
          line = ser.readline().decode("utf-8").rstrip()
-         now = datetime.now().strftime("%d/%m/%y %H:%M:%S")
-         data = [1, now, line]
+         data = {"id": 1, "write_at_str": datetime.now().strftime("%d/%m/%y %H:%M:%S"), "value": line}
          response = requests.post(URL, data=data)
          print(response.text)
