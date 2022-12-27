@@ -65,7 +65,7 @@ def send_data(data):
    lpath = os.path.join(DIR_FILE, "file", str(json_data["sensorid"]) + ".csv")
    ReferenceDbAdapter = DbAdapter(lpath)
    ReferenceDbAdapter.save(ReferenceSensor.get_values())
-   socketio.emit("draw", (len(ReferenceDbAdapter.get())+1, ReferenceSensor.data), broadcast=True)
+   socketio.emit("draw", ReferenceSensor.data, broadcast=True)
    return json_data
 
 
