@@ -1,2 +1,2 @@
-serial
-requests
+serial==0.0.97
+socketIO-client==0.7.2
