@@ -18,7 +18,6 @@ from model.SensorModel import SensorModel
 
 app = Flask(__name__)
 app.config["SECRET_KEY"] = "secret!"
-app.config["DEBUG"] = True
 app.config["PORT"] = 5000
 DIR_FILE = os.path.join(os.path.dirname(__file__))
 socketio = SocketIO(app, cors_allowed_origins="*")
@@ -70,4 +69,5 @@ def send_data(data):
 
 
 if __name__ == "__main__":
+   app.run(debug=True, host='0.0.0.0')
    socketio.run(app)
