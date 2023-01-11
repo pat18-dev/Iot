@@ -1,1 +1,13 @@
 pip install -r .\requirements.txt
+
+pip install --upgrade python-engineio==3.13.2
+
+pip install --upgrade Flask-SocketIO==4.3.1
+
+pip install --upgrade python-socketio==4.6.0
+
+pip install --upgrade gevent==1.5.0
+
+gunicorn --bind 0.0.0.0:5000 app:app
+fuser -k 5000/tcp
+pip install --upgrade socketIO-client==0.7.2
