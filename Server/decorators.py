@@ -57,9 +57,11 @@ def login_required(f):
     def decorated(message):
 
         try:
-            data = jwt.decode(message['token'], globals.current_app.config['SECRET_KEY'])
+            data = jwt.decode(
+                message["token"], globals.current_app.config["SECRET_KEY"]
+            )
             try:
-                user = User.query.filter_by(id=data['id']).first()
+                user = User.query.filter_by(id=data["id"]).first()
                 Globals.current_user = UserSchema().dump(user).data
             except Exception as e:
                 return Error.api_response(Error.USER_NOT_FOUND)

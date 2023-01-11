@@ -1,60 +1,108 @@
-{% extends "components/base.html" %} {% block content %}
-<main class="column is-4 is-offset-4">
-   <h3 class="title">Temperatura</h3>
-   <canvas id="myChart" width="400" height="400"></canvas>
-   <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.3.0/socket.io.dev.js"></script>
-   <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.3/Chart.min.js"></script>
-   <script>
-      // Connect to Socket.IO server
-      var socket = io.connect(window.location.hostname+':5000', {transports: ["websocket"]});
-      // Set up Chart.js line chart
-      const ctx = document.getElementById("myChart").getContext("2d");
-      const tempChart = new Chart(ctx, {
-         type: 'line',
-         data: {
-            datasets: [{
-               label: 'value',
-               data: {{ values }},
-               backgroundColor: 'rgba(255, 99, 132, 0.2)',
-               borderColor: 'rgba(255, 99, 132, 1)',
-               borderWidth: 1,
-               pointRadius: 0
-            }],
-            labels: {{ nserial }}
-         },
-      options: {
-         responsive: true,
-         plugins: {
-            legend: false
-         },
-         scales: {
-            y: {
-            min: 100,
-            max: 200,
-            }
-         }
-      }
-      });
-      socket.on('error', function(){
-         console.log("Sorry, there seems to be an issue with the connection!");
-      });
-      socket.on('connect_error', function(err){
-         console.log("connect failed"+err);
-      });
-      socket.on('connect', function() {
-         console.log("Connected to WS server");
+<!DOCTYPE html>
+<html lang="en">
 
-         console.log(socket.connected); 
-      });
-      // Add new temperature data points to chart when they are received from the server
-      socket.on('draw', (value) => {
-         console.log(socket.id);
-         console.info("EVENT CALL");
-         console.info(value);
-         step = tempChart.data.datasets[0].data.length + 1
-         tempChart.data.datasets[0].data.push(value);
-         tempChart.data.labels.push(step);
-         tempChart.update();
+<head>
+   <meta charset="UTF-8">
+   <title>Creating Real-Time Charts with Flask</title>
+   <!--suppress JSUnresolvedLibraryURL -->
+   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.6.1/css/bootstrap.min.css"
+      integrity="sha512-T584yQ/tdRR5QwOpfvDfVQUidzfgc2339Lc8uBDtcp/wYu80d7jwBgAxbyMh0a9YM9F8N3tdErpFI8iaGx6x5g=="
+      crossorigin="anonymous" referrerpolicy="no-referrer" />
+   <!--suppress JSUnresolvedLibraryURL -->
+   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.4/Chart.min.css"
+      integrity="sha512-/zs32ZEJh+/EO2N1b0PEdoA10JkdC3zJ8L5FTiQu82LR9S/rOQNfQN7U59U9BC12swNeRAz3HSzIL2vpp4fv3w=="
+      crossorigin="anonymous" referrerpolicy="no-referrer" />
+</head>
+
+<body>
+   <div class="container">
+      <div class="row">
+         <div class="col-12">
+            <div class="card">
+               <div class="card-body">
+                  <canvas id="canvas"></canvas>
+               </div>
+            </div>
+         </div>
+      </div>
+   </div>
+   <!--suppress JSUnresolvedLibraryURL -->
+   <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"
+      integrity="sha512-894YE6QWD5I59HgZOGReFYm4dnWc1Qt5NtvYSaNcOP+u1T9qYdvdihz0PPSiiqn/+/3e7Jo4EaG7TubfWGUrMQ=="
+      crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+   <!--suppress JSUnresolvedLibraryURL -->
+   <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.6.1/js/bootstrap.bundle.min.js"
+      integrity="sha512-mULnawDVcCnsk9a4aG1QLZZ6rcce/jSzEGqUkeOLy0b6q0+T6syHrxlsAGH7ZVoqC93Pd0lBqd6WguPWih7VHA=="
+      crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+   <!--suppress JSUnresolvedLibraryURL -->
+   <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.4/Chart.min.js"
+      integrity="sha512-d9xgZrVZpmmQlfonhQUvTR7lMPtO7NkZMkA0ABN3PHCbKA5nqylQ/yWlFAyY6hYgdF1Qh6nYiuADWwKB4C2WSw=="
+      crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+   <script>
+      $(document).ready(function () {
+         const config = {
+            type: 'line',
+            data: {
+               labels: Array(30).fill("0000-00-00 00:00:00"),
+               datasets: [{
+                  label: "Random Dataset",
+                  backgroundColor: 'rgb(255, 99, 132)',
+                  borderColor: 'rgb(255, 99, 132)',
+                  data: Array(30).fill(null),
+                  fill: false,
+               }],
+            },
+            options: {
+               responsive: true,
+               title: {
+                  display: true,
+                  text: 'Creating Real-Time Charts with Flask'
+               },
+               tooltips: {
+                  mode: 'index',
+                  intersect: false,
+               },
+               hover: {
+                  mode: 'nearest',
+                  intersect: true
+               },
+               scales: {
+                  xAxes: [{
+                     display: true,
+                     scaleLabel: {
+                        display: true,
+                        labelString: 'Time'
+                     }
+                  }],
+                  yAxes: [{
+                     display: true,
+                     scaleLabel: {
+                        display: true,
+                        labelString: 'Value'
+                     }
+                  }]
+               }
+            }
+         };
+
+         const context = document.getElementById('canvas').getContext('2d');
+
+         const lineChart = new Chart(context, config);
+
+         const source = new EventSource("/chart-data");
+
+         source.onmessage = function (event) {
+            const data = JSON.parse(event.data);
+            if (config.data.labels.length === 30) {
+               config.data.labels.shift();
+               config.data.datasets[0].data.shift();
+            }
+            config.data.labels.push(data.time);
+            config.data.datasets[0].data.push(data.value);
+            lineChart.update();
+         }
       });
    </script>
-   {% endblock %}
+</body>
+
+</html>

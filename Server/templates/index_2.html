@@ -1,0 +1,60 @@
+{% extends "components/base.html" %} {% block content %}
+<main class="column is-4 is-offset-4">
+   <h3 class="title">Temperatura</h3>
+   <canvas id="myChart" width="400" height="400"></canvas>
+   <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.3.0/socket.io.dev.js"></script>
+   <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.3/Chart.min.js"></script>
+   <script>
+      // Connect to Socket.IO server
+      var socket = io.connect(window.location.hostname+':5000', {transports: ["websocket"]});
+      // Set up Chart.js line chart
+      const ctx = document.getElementById("myChart").getContext("2d");
+      const tempChart = new Chart(ctx, {
+         type: 'line',
+         data: {
+            datasets: [{
+               label: 'value',
+               data: {{ values }},
+               backgroundColor: 'rgba(255, 99, 132, 0.2)',
+               borderColor: 'rgba(255, 99, 132, 1)',
+               borderWidth: 1,
+               pointRadius: 0
+            }],
+            labels: {{ nserial }}
+         },
+      options: {
+         responsive: true,
+         plugins: {
+            legend: false
+         },
+         scales: {
+            y: {
+            min: 100,
+            max: 200,
+            }
+         }
+      }
+      });
+      socket.on('error', function(){
+         console.log("Sorry, there seems to be an issue with the connection!");
+      });
+      socket.on('connect_error', function(err){
+         console.log("connect failed"+err);
+      });
+      socket.on('connect', function() {
+         console.log("Connected to WS server");
+
+         console.log(socket.connected); 
+      });
+      // Add new temperature data points to chart when they are received from the server
+      socket.on('draw', (value) => {
+         console.log(socket.id);
+         console.info("EVENT CALL");
+         console.info(value);
+         step = tempChart.data.datasets[0].data.length + 1
+         tempChart.data.datasets[0].data.push(value);
+         tempChart.data.labels.push(step);
+         tempChart.update();
+      });
+   </script>
+   {% endblock %}
